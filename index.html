@@ -7,7 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
   <style>
+    /* Aquí va tu estilo CSS */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -190,8 +192,6 @@
     <div class="footer-text">¿No tienes una cuenta? Regístrate ahora y crea una cuenta.</div>
   </div>
 
-  <!-- Resto de los contenedores... -->
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAnESjEy7qXHG9y_JhSkkq0d_4L-mt5Qoo",
@@ -232,7 +232,20 @@
 
       firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(userCredential => {
-          userCredential.user.sendEmailVerification();
+          const user = userCredential.user;
+
+          // Almacenar datos adicionales en Firestore
+          const userRef = firebase.firestore().collection('users').doc(user.uid);
+          userRef.set({
+            email: email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            // Aquí puedes agregar más campos si lo deseas
+          });
+
+          // Enviar correo de verificación
+          user.sendEmailVerification();
+
+          // Ocultar el formulario y mostrar el contenedor de verificación
           document.getElementById('loginContainer').classList.add('hidden');
           document.getElementById('verifyContainer').classList.remove('hidden');
         })
